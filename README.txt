@@ -1,1 +1,1 @@
-Anglická slovíčka PWA v7. Nahrajte všechny soubory do kořene repozitáře anglicka-slovicka. Učení vrací chybná slova, testování nikoliv. Ikony mají nové názvy, ale již instalovanou ikonu může operační systém aktualizovat až při přeinstalaci. Před odinstalací exportujte vlastní slovník.
+Anglická slovíčka PWA v8. Učení: 2 po sobě správné odpovědi pro každý směr zvlášť; chybné a první správné pokusy vracejí dvojici do náhodné pozice v horní polovině zbývající fronty. Testování beze změny. Enter při nastavování posouvá fokus, mezerník přepíná checkboxy. Nové ikony.\n

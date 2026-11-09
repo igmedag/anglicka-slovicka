@@ -1,5 +1,5 @@
 'use strict';
-const $=id=>document.getElementById(id), VERSION='7', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+const $=id=>document.getElementById(id), VERSION='8', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
 const IPA='ə æ ɑ ɒ ɔ ʌ ɜ ɪ i ʊ u ɛ e ɐ ɚ ɝ ɡ ŋ ʃ ʒ θ ð tʃ dʒ ˈ ˌ ː ɹ ɾ ɫ'.split(' ');
 const clone=x=>JSON.parse(JSON.stringify(x));const normalize=x=>String(x||'').trim().toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ');
 let words=clone(window.SEED_WORDS), chosen=[], task=null, current=null, screen='setup', returnScreen='setup', editorId=null, study=null;
@@ -23,15 +23,28 @@ function renderList(){const q=normalize($('search').value),list=$('wordList');li
 function addManual(){const q=normalize($('manual').value);if(!q)return;const w=words.find(w=>normalize(w.en)===q);if(!w){message('Výraz není ve slovníku. Přidejte jej nejprve ve Správě slovníku.');return}add(w.id);$('manual').value=''}
 function randomFill(){const poolIds=pool().filter(w=>!chosen.includes(w.id)).map(w=>w.id);for(let i=poolIds.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[poolIds[i],poolIds[j]]=[poolIds[j],poolIds[i]]}chosen.push(...poolIds.slice(0,task.count-chosen.length));renderChosen();save();if(chosen.length<task.count)message('Ve vybrané úrovni a tématech není dost slovíček. Změňte filtr nebo přidejte vlastní.');else message('Výběr doplněn do požadovaného počtu.')}
 function speak(text){if(!('speechSynthesis'in window)){message('Tento prohlížeč nepodporuje hlasové předčítání.');return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='en-GB';u.rate=.86;const voices=speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('en'));const female=voices.find(v=>/female|woman|zira|samantha|victoria|serena|susan|karen|moira|ava/i.test(v.name));u.voice=female||voices.find(v=>v.lang==='en-GB')||voices[0]||null;speechSynthesis.speak(u)}
-function startStudy(mode){if(screen==='dictionary')toggleDictionary();if(!chosen.length){message('Nejprve vytvořte zadání.');return}if(study&&study.mode) sessions[study.mode]={...study,phase:studyPhase,wrong:studyWrong};let saved=sessions[mode];if(!saved||saved.done){saved={mode,index:0,correct:0,attempts:0,order:[...chosen].sort(()=>Math.random()-.5),directions:{},checked:false,done:false,phase:'answer',wrong:false}}study={...saved};studyPhase=saved.phase||'answer';studyWrong=!!saved.wrong;show('study');message(mode==='learn'?'Režim učení.':'Režim testování.')}
-function getCurrent(){return words.find(w=>w.id===study.order[study.index])}
-function direction(){const id=study.order[study.index];if(!study.directions[id])study.directions[id]=task.direction==='mix'?(Math.random()<.5?'cz-en':'en-cz'):task.direction;return study.directions[id]}
+// Učení: každá dvojice (slovíčko, směr) vyžaduje dva po sobě správné pokusy.
+// Fronta obsahuje vždy právě jednu čekající položku pro nedokončenou dvojici.
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function createSession(mode){
+ if(mode==='learn'){
+  const order=shuffle(chosen.flatMap(id=>[{id,dir:'cz-en'},{id,dir:'en-cz'}]));
+  return {mode,index:0,correct:0,attempts:0,order,directions:{},streaks:{},checked:false,done:false,phase:'answer',wrong:false};
+ }
+ return {mode,index:0,correct:0,attempts:0,order:shuffle([...chosen]),directions:{},checked:false,done:false,phase:'answer',wrong:false};
+}
+function startStudy(mode){if(screen==='dictionary')toggleDictionary();if(!chosen.length){message('Nejprve vytvořte zadání.');return}if(study&&study.mode)sessions[study.mode]={...study,phase:studyPhase,wrong:studyWrong};let saved=sessions[mode];if(!saved||saved.done||mode==='learn'&&(!saved.streaks||!saved.order.every(x=>x&&typeof x==='object'&&x.id&&x.dir))){saved=createSession(mode)}study={...saved};studyPhase=saved.phase||'answer';studyWrong=!!saved.wrong;show('study');message(mode==='learn'?'Učení: každý směr dvakrát po sobě správně.':'Režim testování.')}
+function getCurrent(){const item=study.order[study.index];return words.find(w=>w.id===(typeof item==='string'?item:item?.id))}
+function direction(){const item=study.order[study.index];if(study.mode==='learn')return item.dir;const id=item;if(!study.directions[id])study.directions[id]=task.direction==='mix'?(Math.random()<.5?'cz-en':'en-cz'):task.direction;return study.directions[id]}
+function learnKey(item){return item.id+'|'+item.dir}
+function learnRemaining(){return chosen.length*4-Object.values(study.streaks||{}).reduce((a,n)=>a+n,0)}
+function reinsertLearn(item){const rest=study.order.length-study.index-1;const offset=Math.floor(Math.random()*(Math.floor(rest/2)+1))+1;study.order.splice(study.index+offset,0,{...item})}
 function renderStudy(){
  if(!study)return;
  const w=getCurrent();if(!w){show('selection');return}
  const dir=direction(), isCz=dir==='cz-en';
  $('studyTitle').textContent=study.mode==='learn'?'Učení':'Testování';
- const remaining=Math.max(0,study.order.length-study.index-(studyPhase!=='answer'?1:0));
+ const remaining=study.mode==='learn'?learnRemaining():Math.max(0,study.order.length-study.index-(studyPhase!=='answer'?1:0));
  $('progress').textContent='Zbývá správných odpovědí k dokončení: '+remaining+' · ✓ Správně: '+study.correct+' · ✗ Chybně: '+(study.attempts-study.correct)+' · Úspěšnost: '+(study.attempts?Math.round(study.correct/study.attempts*100):0)+' %';
  $('question').textContent=isCz?'Přeložte český význam do angličtiny':'Přeložte anglický výraz do češtiny';
  $('questionLabel').textContent='Český význam';$('answerLabel').textContent='Anglický výraz';
@@ -70,10 +83,17 @@ function renderStudy(){
 let audioContext=null;
 function unlockAudio(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;if(!audioContext)audioContext=new C();if(audioContext.state==='suspended')audioContext.resume().catch(()=>{})}catch(e){}}
 function wrongTone(){try{unlockAudio();if(!audioContext)return;const ctx=audioContext;const play=()=>{const t=ctx.currentTime+.025;[0,.23].forEach((offset,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='square';o.frequency.setValueAtTime(i?175:290,t+offset);g.gain.setValueAtTime(.0001,t+offset);g.gain.linearRampToValueAtTime(.24,t+offset+.018);g.gain.setValueAtTime(.24,t+offset+.14);g.gain.exponentialRampToValueAtTime(.0001,t+offset+.27);o.connect(g);g.connect(ctx.destination);o.start(t+offset);o.stop(t+offset+.28)})};if(ctx.state==='running')play();else ctx.resume().then(play).catch(()=>{})}catch(e){console.warn('Zvuk nelze přehrát',e)}}
-function evaluate(){if(studyPhase!=='answer')return;const w=getCurrent(),dir=direction(),value=normalize(dir==='cz-en'?$('response').value:$('czechResponse').value);if(!value){message('Nejprve vyplňte odpověď.');return}const accepted=dir==='cz-en'?[w.en,...(w.alternatives||[])]:w.cs;const textCorrect=accepted.some(a=>normalize(a)===value);const ipaRequired=task.ipa==='test'&&!!w.ipa;const ipaCorrect=!ipaRequired||$('ipaAnswer').value.trim().replaceAll('/','').replace(/\s/g,'')===w.ipa.trim().replaceAll('/','').replace(/\s/g,'');const correct=textCorrect&&ipaCorrect;study.attempts++;if(correct)study.correct++;else{if(study.mode==='learn')study.order.push(w.id);wrongTone();}study.checked=true;study.response=dir==='cz-en'?$('response').value:$('czechResponse').value;study.ipaResponse=$('ipaAnswer').value;study.correctAnswer=accepted.join(' / ');studyPhase=correct?'result-ok':'result-bad';studyWrong=!correct;renderStudy();if(correct)speak(w.en)}
+function evaluate(){if(studyPhase!=='answer')return;const w=getCurrent(),dir=direction(),value=normalize(dir==='cz-en'?$('response').value:$('czechResponse').value);if(!value){message('Nejprve vyplňte odpověď.');return}const accepted=dir==='cz-en'?[w.en,...(w.alternatives||[])]:w.cs;const textCorrect=accepted.some(a=>normalize(a)===value);const ipaRequired=task.ipa==='test'&&!!w.ipa;const ipaCorrect=!ipaRequired||$('ipaAnswer').value.trim().replaceAll('/','').replace(/\s/g,'')===w.ipa.trim().replaceAll('/','').replace(/\s/g,'');const correct=textCorrect&&ipaCorrect;
+ study.attempts++;if(correct)study.correct++;else wrongTone();
+ if(study.mode==='learn'){
+  const item=study.order[study.index],key=learnKey(item),prior=study.streaks[key]||0;
+  study.streaks[key]=correct?Math.min(2,prior+1):0;
+  if(study.streaks[key]<2)reinsertLearn(item);
+ }
+ study.checked=true;study.response=dir==='cz-en'?$('response').value:$('czechResponse').value;study.ipaResponse=$('ipaAnswer').value;study.correctAnswer=accepted.join(' / ');studyPhase=correct?'result-ok':'result-bad';studyWrong=!correct;renderStudy();if(correct)speak(w.en)}
 function reveal(){if(studyPhase!=='result-bad')return;studyPhase='correction';renderStudy();speak(getCurrent().en)}
 function next(){if(studyPhase!=='result-ok'&&studyPhase!=='correction')return;study.index++;study.checked=false;study.response='';study.ipaResponse='';studyPhase='answer';studyWrong=false;if(study.index>=study.order.length){study.done=true;finish()}else renderStudy()}
-function finish(){sessions[study.mode]=null;show('summary');$('summaryText').textContent=study.mode==='learn'?'Procvičeno '+chosen.length+' slovíček. Všechna byla nakonec zodpovězena správně. Celkem pokusů: '+study.attempts+', chyb: '+(study.attempts-study.correct)+'.':'Otestováno '+study.order.length+' slovíček. Správně: '+study.correct+', chybně: '+(study.attempts-study.correct)+'.';message('Úloha dokončena.')}
+function finish(){sessions[study.mode]=null;show('summary');$('summaryText').textContent=study.mode==='learn'?'Procvičeno '+chosen.length+' slovíček v obou směrech, každý dvakrát po sobě správně. Celkem pokusů: '+study.attempts+', chyb: '+(study.attempts-study.correct)+'.':'Otestováno '+study.order.length+' slovíček. Správně: '+study.correct+', chybně: '+(study.attempts-study.correct)+'.';message('Úloha dokončena.')}
 function editWord(id){const w=words.find(x=>x.id===id);if(!w)return;editorId=id;$('editorTitle').textContent='Upravit slovíčko';$('editEn').value=w.en;$('editCs').value=w.cs.join('; ');$('editIpa').value=w.ipa||'';$('editAlternatives').value=(w.alternatives||[]).join('; ');$('editLevel').value=w.level;$('editTopic').value=w.topic;document.getElementById('editorTitle').scrollIntoView({behavior:'smooth',block:'center'})}
 function clearEditor(){editorId=null;$('editorTitle').textContent='Přidat nové slovíčko';['editEn','editCs','editIpa','editAlternatives'].forEach(id=>$(id).value='');$('editLevel').value='A1';$('editTopic').value=topics[0]}
 function saveWord(){const en=$('editEn').value.trim(),cs=$('editCs').value.split(';').map(x=>x.trim()).filter(Boolean);if(!en||!cs.length){message('Vyplňte anglický výraz a alespoň jeden český překlad.');return}const duplicate=words.find(w=>normalize(w.en)===normalize(en)&&w.id!==editorId);if(duplicate){message('Tento anglický výraz už existuje. Upravte původní záznam.');return}const w={id:editorId||'custom-'+Date.now(),en,cs,ipa:$('editIpa').value.trim(),alternatives:$('editAlternatives').value.split(';').map(x=>x.trim()).filter(Boolean),level:$('editLevel').value,topic:$('editTopic').value};if(editorId){words[words.findIndex(x=>x.id===editorId)]=w}else words.push(w);save();renderDict();clearEditor();message('Slovíčko bylo uloženo.')}
@@ -88,10 +108,23 @@ $('manage').onclick=toggleDictionary;$('exitDictionary').onclick=toggleDictionar
  e.preventDefault();
  if(studyPhase==='answer')evaluate();else if(studyPhase==='result-bad')reveal();else next();
 });
+// Klávesnice při zadávání: Enter přesune fokus na následující prvek,
+// mezerník na checkboxech a tlačítkách zachovává nativní potvrzení.
+document.addEventListener('keydown',e=>{
+ if(e.key!=='Enter'||e.repeat||e.isComposing||!['setup','selection'].includes(screen))return;
+ const el=e.target;
+ if(!el||el.tagName==='TEXTAREA'||el.tagName==='BUTTON'||el.type==='checkbox'||el.type==='file')return;
+ if(screen==='selection'&&el.id==='manual')return;
+ if(!['INPUT','SELECT'].includes(el.tagName))return;
+ e.preventDefault();
+ const scope=screen==='setup'?$('setup'):$('selection');
+ const controls=[...scope.querySelectorAll('input,select,button')].filter(x=>!x.disabled&&x.offsetParent!==null&&x.type!=='hidden');
+ const i=controls.indexOf(el);if(i>=0&&i+1<controls.length)controls[i+1].focus();
+});
 $('nextWord').onclick=next;$('endStudy').onclick=()=>{sessions[study.mode]=null;study=null;studyPhase='answer';show('selection');message('Režim ukončen. Zadání zůstalo zachováno.')};$('summaryBack').onclick=()=>show('selection');$('dictSearch').oninput=renderDict;$('dictLevel').onchange=renderDict;$('saveWord').onclick=saveWord;$('clearEditor').onclick=clearEditor;$('export').onclick=exportWords;$('import').onchange=e=>importWords(e.target.files[0]);async function checkForUpdate(){try{const r=await fetch('./version.json?check='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('Server nedostupný');const data=await r.json();if(Number(data.version)>Number(VERSION)){message('Dostupná nová verze '+data.version+'.');const b=$('checkUpdate');b.textContent='Načíst aktualizaci '+data.version;b.onclick=applyUpdate;b.classList.add('green');}else{message('Používáte aktuální verzi '+VERSION+'.');$('checkUpdate').textContent='Zkontrolovat aktualizaci';}}catch(e){message('Aktualizaci nelze ověřit offline.')}}
 async function applyUpdate(){const b=$('checkUpdate');b.disabled=true;message('Načítám novou verzi…');try{if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});}}const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('anglicka-slovicka-pwa-')).map(k=>caches.delete(k)));window.location.replace('./index.html?refresh='+Date.now());}catch(e){b.disabled=false;message('Automatická aktualizace se nezdařila. Otevřete aplikaci v Chromu a obnovte stránku.')}}
 $('checkUpdate').onclick=checkForUpdate;
-populateTopics();addIpaKeys('ipaKeys','response');addIpaKeys('editIpaKeys','editIpa');load();show(screen);if(screen==='summary'&&study?.done)finish();message('Testovací verze v7 · '+words.length+' slovíček. Připraveno k použití.');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+populateTopics();addIpaKeys('ipaKeys','response');addIpaKeys('editIpaKeys','editIpa');load();show(screen);if(screen==='summary'&&study?.done)finish();message('Testovací verze v8 · '+words.length+' slovíček. Připraveno k použití.');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 
 function resetWork(){chosen=[];task=null;study=null;sessions={learn:null,test:null};studyPhase='answer';studyWrong=false;returnScreen='setup';$('count').value='';$('level').value='all';$('direction').value='mix';$('ipaMode').value='show';$('autoSpeak').checked=true;for(const i of $('topics').querySelectorAll('input'))i.checked=false;$('listBox').classList.add('hidden');$('manual').value='';$('search').value='';try{localStorage.removeItem(PROGRESS)}catch(e){}show('setup');message('Klikněte na Nové zadání. Slovník zůstal zachován.');}
 $('powerBtn').onclick=()=>{if(window.confirm('Opravdu ukončit práci? Rozpracované zadání, Učení i Testování budou smazány. Slovník zůstane zachován.'))resetWork()};
