@@ -1,5 +1,5 @@
 {
-  "id": "./anglicka-slovicka-unique-pwa",
+  "id": "/anglicka-slovicka/",
   "name": "Anglická slovíčka – A1 až C1",
   "short_name": "Anglická slovíčka",
   "description": "Učení a testování anglické slovní zásoby A1–C1",
@@ -7,18 +7,20 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#edf2f7",
-  "theme_color": "#1766aa",
+  "background_color": "#edf7f1",
+  "theme_color": "#16765f",
   "icons": [
     {
       "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "./icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

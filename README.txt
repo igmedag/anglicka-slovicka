@@ -1,4 +1,1 @@
-Anglická slovíčka – PWA v2
-Nové samostatné PWA ID, řazení slovíček, zachování výběru při změně filtrů, oprava Enter, zvuk chyby a ovládacích tlačítek.
-Nasazujte do samostatného GitHub Pages repozitáře anglicka-slovicka.
-Pozor: PWA instalované dříve s chybnou identitou může být nutné odinstalovat a nainstalovat znovu. Předtím exportujte vlastní slovník.
+Anglická slovíčka PWA v3 – samostatná aplikace. Nahrajte soubory do repozitáře anglicka-slovicka. Při kolizi instalací zkontrolujte URL a starou instalaci, případně starý service worker.
