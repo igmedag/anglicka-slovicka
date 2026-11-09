@@ -1,2 +1,2 @@
-Anglická slovíčka PWA v11
-Změna oproti v9: fialová ikona podle dodané předlohy, bez šipky zástupce; aktualizace verze, manifestu a cache.
+Anglická slovíčka PWA v12 – oprava zobrazení čísla verze a nové adresy instalačních ikon.
+Před případnou reinstalací exportujte vlastní slovník.

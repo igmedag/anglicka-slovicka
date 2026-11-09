@@ -1,5 +1,6 @@
 'use strict';
-const $=id=>document.getElementById(id), VERSION='11', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+const $=id=>document.getElementById(id), VERSION='12', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+document.addEventListener('DOMContentLoaded',()=>{const v=document.getElementById('currentVersion');if(v)v.textContent='Verze '+VERSION;});
 const IPA='ə æ ɑ ɒ ɔ ʌ ɜ ɪ i ʊ u ɛ e ɐ ɚ ɝ ɡ ŋ ʃ ʒ θ ð tʃ dʒ ˈ ˌ ː ɹ ɾ ɫ'.split(' ');
 const clone=x=>JSON.parse(JSON.stringify(x));const normalize=x=>String(x||'').trim().toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ');
 let words=clone(window.SEED_WORDS), chosen=[], task=null, current=null, screen='setup', returnScreen='setup', editorId=null, study=null;
