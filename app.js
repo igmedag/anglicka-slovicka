@@ -1,5 +1,5 @@
 'use strict';
-const $=id=>document.getElementById(id), VERSION='4', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+const $=id=>document.getElementById(id), VERSION='5', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
 const IPA='ə æ ɑ ɒ ɔ ʌ ɜ ɪ i ʊ u ɛ e ɐ ɚ ɝ ɡ ŋ ʃ ʒ θ ð tʃ dʒ ˈ ˌ ː ɹ ɾ ɫ'.split(' ');
 const clone=x=>JSON.parse(JSON.stringify(x));const normalize=x=>String(x||'').trim().toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ');
 let words=clone(window.SEED_WORDS), chosen=[], task=null, current=null, screen='setup', returnScreen='setup', editorId=null, study=null;
@@ -88,7 +88,7 @@ $('manage').onclick=toggleDictionary;$('exitDictionary').onclick=toggleDictionar
  if(studyPhase==='answer')evaluate();else if(studyPhase==='result-bad')reveal();else next();
 });
 $('nextWord').onclick=next;$('endStudy').onclick=()=>{sessions[study.mode]=null;study=null;studyPhase='answer';show('selection');message('Režim ukončen. Zadání zůstalo zachováno.')};$('summaryBack').onclick=()=>show('selection');$('dictSearch').oninput=renderDict;$('dictLevel').onchange=renderDict;$('saveWord').onclick=saveWord;$('clearEditor').onclick=clearEditor;$('export').onclick=exportWords;$('import').onchange=e=>importWords(e.target.files[0]);$('checkUpdate').onclick=async()=>{try{const r=await fetch('version.json?time='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('Server nedostupný');const v=await r.json();message(Number(v.version)>Number(VERSION)?'Dostupná nová verze '+v.version+'. Obnovte aplikaci.':'Používáte aktuální verzi '+VERSION+'.')}catch(e){message('Aktualizaci nelze ověřit offline.')}};
-populateTopics();addIpaKeys('ipaKeys','response');addIpaKeys('editIpaKeys','editIpa');load();show(screen);if(screen==='summary'&&study?.done)finish();message('Testovací verze v3 · '+words.length+' slovíček. Připraveno k použití.');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+populateTopics();addIpaKeys('ipaKeys','response');addIpaKeys('editIpaKeys','editIpa');load();show(screen);if(screen==='summary'&&study?.done)finish();message('Testovací verze v5 · '+words.length+' slovíček. Připraveno k použití.');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 
 $('powerBtn').onclick=()=>{$('exitOverlay').classList.remove('hidden')};
 $('stayApp').onclick=()=>{$('exitOverlay').classList.add('hidden')};

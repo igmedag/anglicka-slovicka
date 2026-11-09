@@ -1,1 +1,3 @@
-Anglická slovíčka PWA v4. Nahrajte celý obsah ZIP do kořene repozitáře anglicka-slovicka. Zkontrolujte na stránce označení v4. Před testem doporučujeme zálohovat vlastní slovník exportem JSON.
+Anglická slovíčka – testovací PWA v5
+Pouze jedno ovládání opakování výslovnosti: malé kulaté tlačítko reproduktoru vedle IPA. V této verzi je sjednoceno označení verze v aplikaci, skriptu, version.json a service workeru.
+Nahrajte všechny soubory do kořene repozitáře anglicka-slovicka.
