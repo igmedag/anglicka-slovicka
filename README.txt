@@ -1,1 +1,1 @@
-Anglická slovíčka PWA v6 – testovací verze. Nahrajte všechny soubory do kořene GitHub Pages repozitáře anglicka-slovicka. Slovník a průběh jsou v localStorage; před odinstalací exportujte vlastní slovník.
+Anglická slovíčka PWA v7. Nahrajte všechny soubory do kořene repozitáře anglicka-slovicka. Učení vrací chybná slova, testování nikoliv. Ikony mají nové názvy, ale již instalovanou ikonu může operační systém aktualizovat až při přeinstalaci. Před odinstalací exportujte vlastní slovník.
