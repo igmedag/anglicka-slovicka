@@ -1,1 +1,1 @@
-Anglická slovíčka PWA v3 – samostatná aplikace. Nahrajte soubory do repozitáře anglicka-slovicka. Při kolizi instalací zkontrolujte URL a starou instalaci, případně starý service worker.
+Anglická slovíčka PWA v4. Nahrajte celý obsah ZIP do kořene repozitáře anglicka-slovicka. Zkontrolujte na stránce označení v4. Před testem doporučujeme zálohovat vlastní slovník exportem JSON.
