@@ -1,13 +1,4 @@
-Anglická slovíčka – PWA v13
-
-Změny oproti v12:
-- Vypínací tlačítko má správný vektorový symbol zapnutí/vypnutí.
-- Na mobilu je vypínací tlačítko vpravo nahoře vedle názvu aplikace.
-- Správa slovníku se na úzkých obrazovkách zobrazuje pod záhlavím.
-- Sjednoceno označení verze na v13, včetně stavové zprávy a aktualizačního souboru.
-- Aktualizována verze offline cache service workeru.
-
-Slovník, jeho uložená data a identita aplikace PWA zůstávají zachovány.
-Před reinstalací doporučujeme exportovat vlastní slovník.
-
-Instalace na GitHub Pages: nahrajte všechny soubory ZIP archivu do kořenové složky repozitáře, přepište stejnojmenné soubory a ponechte obrázky ikon.
+Anglická slovíčka (AS) v14 – ostrá aplikace.
+Změny: přehledné ovládání, deaktivace nedostupných prvků, průběžné vyhodnocení při ukončení, delší výrazy, našeptávání, IPA pouze k zobrazení, věnování a © MEDAG 2026.
+Slovník má nyní 300 výchozích záznamů, případně další uživatelské záznamy; 10 000 slov zatím není obsaženo.
+Před aktualizací doporučujeme exportovat slovník jako zálohu.
