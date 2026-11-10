@@ -1,5 +1,5 @@
 'use strict';
-const $=id=>document.getElementById(id), VERSION='14', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+const $=id=>document.getElementById(id), VERSION='15', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
 document.addEventListener('DOMContentLoaded',()=>{const v=document.getElementById('currentVersion');if(v)v.textContent='Verze '+VERSION;});
 const IPA='ə æ ɑ ɒ ɔ ʌ ɜ ɪ i ʊ u ɛ e ɐ ɚ ɝ ɡ ŋ ʃ ʒ θ ð tʃ dʒ ˈ ˌ ː ɹ ɾ ɫ'.split(' ');
 const clone=x=>JSON.parse(JSON.stringify(x));const normalize=x=>String(x||'').trim().toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ');
@@ -161,7 +161,9 @@ document.addEventListener('keydown',e=>{
  controls[j]?.focus();
 },true);
 $('nextWord').onclick=next;$('endStudy').onclick=()=>{if(studyPhase==='answer'){const field=direction()==='cz-en'?$('response'):$('czechResponse');if(field&&field.value?.trim())study.response=field.value}finish(true)};$('summaryBack').onclick=()=>show('selection');$('dictSearch').oninput=renderDict;$('dictLevel').onchange=renderDict;$('saveWord').onclick=saveWord;$('clearEditor').onclick=clearEditor;$('export').onclick=exportWords;$('import').onchange=e=>importWords(e.target.files[0]);async function checkForUpdate(){try{const r=await fetch('./version.json?check='+Date.now(),{cache:'no-store'});if(!r.ok)throw Error('Server nedostupný');const data=await r.json();if(Number(data.version)>Number(VERSION)){message('Dostupná nová verze '+data.version+'.');const b=$('checkUpdate');b.textContent='Načíst aktualizaci '+data.version;b.onclick=applyUpdate;b.classList.add('green');}else{message('Používáte aktuální verzi '+VERSION+'.');$('checkUpdate').textContent='Zkontrolovat aktualizaci';}}catch(e){message('Aktualizaci nelze ověřit offline.')}}
-async function applyUpdate(){const b=$('checkUpdate');b.disabled=true;message('Načítám novou verzi…');try{if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});}}const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('anglicka-slovicka-pwa-')).map(k=>caches.delete(k)));window.location.replace('./index.html?refresh='+Date.now());}catch(e){b.disabled=false;message('Automatická aktualizace se nezdařila. Otevřete aplikaci v Chromu a obnovte stránku.')}}
+async function applyUpdate(){const b=$('checkUpdate');b.disabled=true;message('Načítám novou verzi…');try{if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});}}// Neodstraňovat aktivní cache před převzetím řízení novým service workerem.
+      // Nový worker sám při aktivaci odstraní předchozí verze.
+      window.location.replace('./index.html?refresh='+Date.now());}catch(e){b.disabled=false;message('Automatická aktualizace se nezdařila. Otevřete aplikaci v Chromu a obnovte stránku.')}}
 $('checkUpdate').onclick=checkForUpdate;
 populateTopics();addIpaKeys('editIpaKeys','editIpa');load();show(screen);updateControls();if(screen==='summary'&&study?.done){const last=study;finish(true);study=last;}message('Zvolte parametry nového zadání.');if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
 
