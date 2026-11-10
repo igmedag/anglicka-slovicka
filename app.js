@@ -1,6 +1,6 @@
 'use strict';
-const $=id=>document.getElementById(id), VERSION='16', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
-document.addEventListener('DOMContentLoaded',()=>{const v=document.getElementById('currentVersion');if(v)v.textContent='Verze '+VERSION;});
+const $=id=>document.getElementById(id), VERSION='17', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+function syncVersion(){const v=document.getElementById('currentVersion');if(v)v.textContent='Verze '+VERSION;}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncVersion);else syncVersion();
 const IPA='ə æ ɑ ɒ ɔ ʌ ɜ ɪ i ʊ u ɛ e ɐ ɚ ɝ ɡ ŋ ʃ ʒ θ ð tʃ dʒ ˈ ˌ ː ɹ ɾ ɫ'.split(' ');
 const clone=x=>JSON.parse(JSON.stringify(x));const normalize=x=>String(x||'').trim().toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ');
 let words=clone(window.SEED_WORDS), chosen=[], task=null, current=null, screen='setup', returnScreen='setup', editorId=null, study=null;
@@ -54,7 +54,7 @@ function createSession(mode){
 }
 function startStudy(mode){if(screen==='dictionary')toggleDictionary();if(!chosen.length){message('Nejprve vytvořte zadání.');return}if(study&&study.mode)sessions[study.mode]={...study,phase:studyPhase,wrong:studyWrong};let saved=sessions[mode];if(!saved||saved.done||mode==='learn'&&(!saved.streaks||!saved.order.every(x=>x&&typeof x==='object'&&x.id&&x.dir&&(task.direction==='mix'||x.dir===task.direction)))){saved=createSession(mode)}study={...saved};studyPhase=saved.phase||'answer';studyWrong=!!saved.wrong;show('study');message(mode==='learn'?(task.direction==='mix'?'Učení: oba směry dvakrát po sobě správně.':'Učení: zvolený směr dvakrát po sobě správně.'):'Režim testování.')}
 function getCurrent(){const item=study.order[study.index];return words.find(w=>w.id===(typeof item==='string'?item:item?.id))}
-function direction(){const item=study.order[study.index];if(study.mode==='learn')return item.dir;const id=item;if(!study.directions[id])study.directions[id]=task.direction==='mix'?(Math.random()<.5?'cz-en':'en-cz'):task.direction;return study.directions[id]}
+function direction(){const item=study.order[study.index];if(task.direction==='cz-en'||task.direction==='en-cz')return task.direction;if(study.mode==='learn')return item.dir;const id=item;if(!study.directions[id])study.directions[id]=Math.random()<.5?'cz-en':'en-cz';return study.directions[id]}
 function learnKey(item){return item.id+'|'+item.dir}
 function learnRemaining(){const required=task.direction==='mix'?4:2;return chosen.length*required-Object.values(study.streaks||{}).reduce((a,n)=>a+n,0)}
 function reinsertLearn(item){const rest=study.order.length-study.index-1;const offset=Math.floor(Math.random()*(Math.floor(rest/2)+1))+1;study.order.splice(study.index+offset,0,{...item})}

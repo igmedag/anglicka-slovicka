@@ -1,3 +1,3 @@
-Anglická slovíčka (AS) v16 – opravné vydání po v14.
+Anglická slovíčka (AS) v17 – opravné vydání po v14.
 Opravené verzování HTML, aktualizační proces PWA a nezalamitelné © MEDAG 2026.
 Zachovány datové klíče a ostatní funkce v14.
