@@ -1,5 +1,5 @@
 'use strict';
-const $=id=>document.getElementById(id), VERSION='21', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+const $=id=>document.getElementById(id), VERSION='22', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
 function syncVersion(){const v=document.getElementById('currentVersion');if(v)v.textContent='Verze '+VERSION;const sub=document.getElementById('subtitleVersion');if(sub)sub.textContent='verze '+VERSION;}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncVersion);else syncVersion();
 const IPA='ə æ ɑ ɒ ɔ ʌ ɜ ɪ i ʊ u ɛ e ɐ ɚ ɝ ɡ ŋ ʃ ʒ θ ð tʃ dʒ ˈ ˌ ː ɹ ɾ ɫ'.split(' ');
 const clone=x=>JSON.parse(JSON.stringify(x));const normalize=x=>String(x||'').trim().toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ');
@@ -12,9 +12,12 @@ function save(){try{localStorage.setItem(STORE,JSON.stringify(words));localStora
 function load(){try{const d=JSON.parse(localStorage.getItem(STORE));if(Array.isArray(d)&&d.every(w=>w&&typeof w.en==='string'&&Array.isArray(w.cs))){
  // Merge newly shipped dictionary entries by stable ID; preserve every existing user edit.
  const byId=new Map(d.map(w=>[w.id,w]));
- words=window.SEED_WORDS.map(w=>byId.get(w.id)||w);
+ words=window.SEED_WORDS.map(w=>{const old=byId.get(w.id);if(!old)return w;
+ // Preserve translations and other user edits; recover IPA omitted by older versions.
+ return {...old,ipa:(typeof old.ipa==='string'&&old.ipa.trim())?old.ipa:(w.ipa||'')};});
  const builtIn=new Set(window.SEED_WORDS.map(w=>w.id));
- for(const w of d)if(!builtIn.has(w.id))words.push(w);
+ const seedIPA=new Map();for(const w of window.SEED_WORDS)if(w.ipa&&!seedIPA.has(normalize(w.en)))seedIPA.set(normalize(w.en),w.ipa);
+ for(const w of d)if(!builtIn.has(w.id))words.push((w.ipa&&w.ipa.trim())?w:{...w,ipa:seedIPA.get(normalize(w.en))||w.ipa||''});
  }const p=JSON.parse(localStorage.getItem(PROGRESS));if(p){chosen=(p.chosen||[]).filter(id=>words.some(w=>w.id===id));task=p.task||null;study=p.study||null;sessions=p.sessions||{learn:null,test:null};studyPhase=p.studyPhase||"answer";studyWrong=!!p.studyWrong;screen=['setup','selection','study','summary'].includes(p.screen)?p.screen:'setup';if(screen==='study'&&!study)screen='selection';if(task){$('count').value=task.count;$('level').value=task.level;$('direction').value=task.direction;$('autoSpeak').checked=task.autoSpeak;for(const el of $('topics').querySelectorAll('input'))el.checked=task.topics.includes(el.value)}}}catch(e){message('Uložená data nelze načíst.')}}
 function show(name){screen=name;['setup','selection','study','summary','dictionary'].forEach(id=>$(id).classList.toggle('hidden',id!==name));$('manage').textContent=name==='dictionary'?'Opustit správu slovníku':'Správa slovníku';$('manage').classList.toggle('danger',name==='dictionary');if(name==='selection'){renderCriteria();renderChosen();}if(name==='dictionary')renderDict();$('updatePanel').classList.toggle('hidden',name!=='setup');if(name==='study')renderStudy();updateControls();save();if(name==='setup' && window.matchMedia('(pointer:fine)').matches)setTimeout(()=>$('count').focus({preventScroll:true}),0)}
 function updateControls(){
@@ -110,7 +113,9 @@ function renderStudy(){
  $('czechCell').className='answerCell'+state;
  $('answerCell').className='answerCell'+state;
  $('ipaCell').className='answerCell'+(studyPhase==='result-ok'?' good':studyPhase==='result-bad'?' bad':' neutral');
- $('ipaCell').classList.remove('hidden');$('ipaCellText').textContent=isAnswer?'':(w.ipa||'IPA zatím není doplněna');
+ $('ipaCell').classList.remove('hidden');
+ const ipaFromSeed=window.SEED_WORDS.find(x=>x.id===w.id&&x.ipa)||window.SEED_WORDS.find(x=>normalize(x.en)===normalize(w.en)&&x.ipa);
+ $('ipaCellText').textContent=isAnswer?'':(w.ipa||ipaFromSeed?.ipa||'IPA zatím není doplněna');
  if(studyPhase==='correction'){
    csInput.value=w.cs.join(' / ');en.value=w.en;
    $('czechCell').className='answerCell neutral';$('answerCell').className='answerCell neutral';$('ipaCell').className='answerCell neutral';

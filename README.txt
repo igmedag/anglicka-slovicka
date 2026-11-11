@@ -3,3 +3,5 @@ Anglická slovíčka (AS) v19. Obsahuje 10 000 slovníkových položek. Rozděle
 Verze 20: synchronizace titulku, IPA až po vyhodnocení, abecední navigace a stránkování po 100 položkách, posun k nevyplněnému počtu.
 
 Verze 21: mobilní klávesnice se při vstupu do zadání automaticky neotevírá; IPA pole zůstává viditelné, přepis se zobrazí po vyhodnocení; reproduktor funguje i před vyhodnocením.
+
+Verze 22: obnovení chybějící IPA u položek zachovaných z předchozích verzí, včetně průběžného zobrazení po vyhodnocení.
