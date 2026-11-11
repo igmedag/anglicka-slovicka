@@ -5,3 +5,5 @@ Verze 20: synchronizace titulku, IPA až po vyhodnocení, abecední navigace a s
 Verze 21: mobilní klávesnice se při vstupu do zadání automaticky neotevírá; IPA pole zůstává viditelné, přepis se zobrazí po vyhodnocení; reproduktor funguje i před vyhodnocením.
 
 Verze 22: obnovení chybějící IPA u položek zachovaných z předchozích verzí, včetně průběžného zobrazení po vyhodnocení.
+
+Verze 23: výběr slovní zásoby kumulativně (A1 až zvolená úroveň) nebo pouze přesně zvolená úroveň. Výchozí režim je kumulativní; rozpracované úlohy starších verzí si zachovají původní přesný filtr.
