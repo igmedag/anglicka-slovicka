@@ -1,3 +1,1 @@
-Anglická slovíčka (AS) v17 – opravné vydání po v14.
-Opravené verzování HTML, aktualizační proces PWA a nezalamitelné © MEDAG 2026.
-Zachovány datové klíče a ostatní funkce v14.
+Anglická slovíčka (AS) v18. Obsahuje 10 000 slovníkových položek. Rozdělení úrovní A1–C1 je orientační heuristický odhad, nikoli ověřené CEFR; frekvenční pořadí nebylo ověřeno. Překlady a IPA z en-cs (CC BY-SA 4.0), viz ATTRIBUTION a LICENSE. Vlastní slovíčka a úpravy se slučují podle ID.
