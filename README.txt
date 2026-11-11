@@ -9,3 +9,5 @@ Verze 22: obnovení chybějící IPA u položek zachovaných z předchozích ver
 Verze 23: výběr slovní zásoby kumulativně (A1 až zvolená úroveň) nebo pouze přesně zvolená úroveň. Výchozí režim je kumulativní; rozpracované úlohy starších verzí si zachovají původní přesný filtr.
 
 Verze 24: Obnovení otevřeného seznamu po změně filtrů; potvrzení před předčasným ukončením Učení/Testování.
+
+Verze 25: Obnovení výchozího slovníku se zálohou a opakovaným potvrzením.
