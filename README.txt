@@ -7,3 +7,5 @@ Verze 21: mobilní klávesnice se při vstupu do zadání automaticky neotevír�
 Verze 22: obnovení chybějící IPA u položek zachovaných z předchozích verzí, včetně průběžného zobrazení po vyhodnocení.
 
 Verze 23: výběr slovní zásoby kumulativně (A1 až zvolená úroveň) nebo pouze přesně zvolená úroveň. Výchozí režim je kumulativní; rozpracované úlohy starších verzí si zachovají původní přesný filtr.
+
+Verze 24: Obnovení otevřeného seznamu po změně filtrů; potvrzení před předčasným ukončením Učení/Testování.
