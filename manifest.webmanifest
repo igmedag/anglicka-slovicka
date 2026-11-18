@@ -7,17 +7,17 @@
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f6f0fc",
-  "theme_color": "#7832bc",
+  "background_color": "#f4f7fb",
+  "theme_color": "#012169",
   "icons": [
     {
-      "src": "./icon-192-v12.png",
+      "src": "./icon-192-as-v26.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "./icon-512-v12.png",
+      "src": "./icon-512-as-v26.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
