@@ -15,3 +15,5 @@ Verze 25: Obnovení výchozího slovníku se zálohou a opakovaným potvrzením.
 Verze 27: automatický posun k aktivnímu tlačítku po vyhodnocení a zobrazení správných tvarů.
 
 Verze 29: na dotykové obrazovce zarovnání nadpisu otázky 8 px od horního okraje, bez posunu k tlačítkům.
+
+Verze 30: sjednocení názvu aplikace v manifestu a titulku stránky.
