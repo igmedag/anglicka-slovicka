@@ -11,3 +11,5 @@ Verze 23: výběr slovní zásoby kumulativně (A1 až zvolená úroveň) nebo p
 Verze 24: Obnovení otevřeného seznamu po změně filtrů; potvrzení před předčasným ukončením Učení/Testování.
 
 Verze 25: Obnovení výchozího slovníku se zálohou a opakovaným potvrzením.
+
+Verze 27: automatický posun k aktivnímu tlačítku po vyhodnocení a zobrazení správných tvarů.

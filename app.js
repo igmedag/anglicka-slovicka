@@ -1,5 +1,5 @@
 'use strict';
-const $=id=>document.getElementById(id), VERSION='26', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
+const $=id=>document.getElementById(id), VERSION='27', STORE='anglicka-slovicka-v1-dictionary', PROGRESS='anglicka-slovicka-v1-progress';
 function syncVersion(){const v=document.getElementById('currentVersion');if(v)v.textContent='Verze '+VERSION;const sub=document.getElementById('subtitleVersion');if(sub)sub.textContent='verze '+VERSION;}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncVersion);else syncVersion();
 const IPA='ə æ ɑ ɒ ɔ ʌ ɜ ɪ i ʊ u ɛ e ɐ ɚ ɝ ɡ ŋ ʃ ʒ θ ð tʃ dʒ ˈ ˌ ː ɹ ɾ ɫ'.split(' ');
 const clone=x=>JSON.parse(JSON.stringify(x));const normalize=x=>String(x||'').trim().toLocaleLowerCase('cs').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[.,!?;:]+$/,'').replace(/\s+/g,' ');
@@ -91,6 +91,24 @@ function learnKey(item){return item.id+'|'+item.dir}
 function learnRemaining(){const required=task.direction==='mix'?4:2;return chosen.length*required-Object.values(study.streaks||{}).reduce((a,n)=>a+n,0)}
 function reinsertLearn(item){const rest=study.order.length-study.index-1;const offset=Math.floor(Math.random()*(Math.floor(rest/2)+1))+1;study.order.splice(study.index+offset,0,{...item})}
 function toggleStudyList(){const panel=$('studyWordList');panel.classList.toggle('hidden');if(panel.classList.contains('hidden'))return;const box=$('studyWordListContent');box.replaceChildren();for(const id of [...chosen].sort((a,b)=>byEnglish(words.find(w=>w.id===a),words.find(w=>w.id===b)))){const w=words.find(x=>x.id===id);if(!w)continue;const div=document.createElement('div');div.className='wordrow';div.textContent=w.en+' — '+w.cs.join(' / ');box.append(div)}}
+// Keep the current continuation action visible, including while the mobile keyboard closes.
+let continuationRun=0;
+function showContinuation(){
+ const run=++continuationRun, phase=studyPhase, current=study, index=study.index;
+ const button=$(phase==='result-bad'?'reveal':'nextWord');
+ button.focus({preventScroll:true});
+ function ensureVisible(){
+  if(run!==continuationRun||screen!=='study'||study!==current||study.index!==index||studyPhase!==phase||!button.getClientRects().length)return;
+  const viewport=window.visualViewport, top=viewport?.offsetTop||0, bottom=top+(viewport?.height||window.innerHeight);
+  const rect=button.getBoundingClientRect(), margin=12;
+  if(rect.bottom>bottom-margin)window.scrollBy({top:rect.bottom-bottom+margin,behavior:'instant'});
+  else if(rect.top<top+margin)window.scrollBy({top:rect.top-top-margin,behavior:'instant'});
+ }
+ requestAnimationFrame(ensureVisible);
+ const viewport=window.visualViewport;
+ viewport?.addEventListener('resize',ensureVisible);
+ setTimeout(()=>{viewport?.removeEventListener('resize',ensureVisible);ensureVisible()},450);
+}
 function renderStudy(){
  if(!study)return;
  const w=getCurrent();if(!w){show('selection');return}
@@ -132,7 +150,7 @@ function renderStudy(){
  if(studyPhase==='result-bad')$('feedback').textContent='Chyba. Váš zápis zůstává červený. Enterem nebo tlačítkem zobrazte správné tvary.';
  if(studyPhase==='result-ok')$('feedback').textContent='Správně! Poslechněte si výslovnost. Další slovíčko otevřete Enterem nebo tlačítkem.';
  if(studyPhase==='correction')$('feedback').textContent='Správné tvary. Poslechněte si výslovnost a pokračujte Enterem nebo tlačítkem.';
- for(const field of [csInput,en]){if(field.tagName==='TEXTAREA'){field.style.height='auto';field.style.height=Math.max(54,field.scrollHeight+3)+'px'}}if(isAnswer)active.focus();
+ for(const field of [csInput,en]){if(field.tagName==='TEXTAREA'){field.style.height='auto';field.style.height=Math.max(54,field.scrollHeight+3)+'px'}}if(isAnswer){++continuationRun;active.focus();}else showContinuation();
  save();
 }
 let audioContext=null;
