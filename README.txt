@@ -13,3 +13,5 @@ Verze 24: Obnovení otevřeného seznamu po změně filtrů; potvrzení před p�
 Verze 25: Obnovení výchozího slovníku se zálohou a opakovaným potvrzením.
 
 Verze 27: automatický posun k aktivnímu tlačítku po vyhodnocení a zobrazení správných tvarů.
+
+Verze 28: na dotykové obrazovce zarovnání nadpisu otázky 8 px od horního okraje, bez posunu k tlačítkům.
